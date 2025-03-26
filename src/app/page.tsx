@@ -33,7 +33,7 @@ export default function Home() {
         setDisplayedText("Thinking...");
 
         try {
-            const response = await fetch("https://ai-agent-assist-bot.onrender.com/ask", {
+            const response = await fetch("https://ai-assist-bot-backend.onrender.com/ask", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question }),
