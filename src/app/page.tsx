@@ -50,7 +50,7 @@ export default function Home() {
         }
     };
 
-    const simulateTyping = (text) => {
+    const simulateTyping = (text: string) => {
         let index = 0;
         setDisplayedText("");
         const interval = setInterval(() => {
