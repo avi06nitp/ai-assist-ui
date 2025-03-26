@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 import { Send, Loader2, Check, CheckCheck } from "lucide-react";
 
-export default function Home() {
+export default function AIChatMaster() {
     const [question, setQuestion] = useState("");
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+
     interface Message {
         role: "user" | "bot";
         text: string;
@@ -66,6 +68,10 @@ export default function Home() {
         }, 10);
     };
 
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
     return (
         <div className="flex flex-col items-center justify-center h-screen w-screen bg-gradient-to-br from-[#f3edff] to-[#dad0ff] text-black px-4 py-2 md:px-12 font-sans">
             <motion.div
@@ -74,8 +80,12 @@ export default function Home() {
                 transition={{ duration: 0.5 }}
                 className="w-full max-w-3xl bg-white p-4 md:p-6 rounded-2xl shadow-xl flex flex-col space-y-4 border border-gray-200 h-full md:h-[90vh]"
             >
-                <h1 className="text-3xl md:text-4xl font-extrabold text-center text-[#5f17c5]">Chat with AI</h1>
-                <div className="flex-1 overflow-y-auto p-4 bg-[#f5f5ff] rounded-lg space-y-4 max-h-[70vh] md:max-h-full">
+                <h1 className="text-4xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-[#5f17c5] to-[#9b34ef] text-transparent bg-clip-text tracking-[0.3em] uppercase relative">
+                    Orbis
+
+                </h1>
+
+                <div className="flex-1 overflow-y-auto p-4 bg-[#f5f5ff] rounded-lg space-y-4 max-h-[70vh] md:max-h-full scrollbar-hide">
                     {messages.map((msg, index) => (
                         <motion.div
                             key={index}
@@ -100,6 +110,7 @@ export default function Home() {
                             </div>
                         </div>
                     )}
+                    <div ref={messagesEndRef} />
                 </div>
                 <div className="flex space-x-2 md:space-x-3 items-center">
                     <input
@@ -117,6 +128,7 @@ export default function Home() {
                         {isTyping ? <Loader2 className="animate-spin" color="white" /> : <Send color="white" />}
                     </button>
                 </div>
+                <footer className="text-center text-gray-500 text-xs mt-2">© 2025 Atomic Labs Pvt. Ltd. All rights reserved.</footer>
             </motion.div>
         </div>
     );
