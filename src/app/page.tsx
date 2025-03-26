@@ -67,15 +67,15 @@ export default function Home() {
     };
 
     return (
-        <div className="flex md:px-12 flex-col items-center justify-center h-screen w-screen bg-gradient-to-br from-[#f3edff] to-[#dad0ff] text-black px-6 py-2 font-sans">
+        <div className="flex flex-col items-center justify-center h-screen w-screen bg-gradient-to-br from-[#f3edff] to-[#dad0ff] text-black px-4 py-2 md:px-12 font-sans">
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="w-full  bg-white p-4 rounded-2xl shadow-2xl flex flex-col space-y-4 border border-gray-200 h-full"
+                className="w-full max-w-3xl bg-white p-4 md:p-6 rounded-2xl shadow-xl flex flex-col space-y-4 border border-gray-200 h-full md:h-[90vh]"
             >
-                <h1 className="text-4xl font-extrabold text-center text-[#5f17c5]">Chat with AI</h1>
-                <div className="flex-1 overflow-y-auto p-4 bg-[#f5f5ff] rounded-lg space-y-4">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-center text-[#5f17c5]">Chat with AI</h1>
+                <div className="flex-1 overflow-y-auto p-4 bg-[#f5f5ff] rounded-lg space-y-4 max-h-[70vh] md:max-h-full">
                     {messages.map((msg, index) => (
                         <motion.div
                             key={index}
@@ -84,7 +84,7 @@ export default function Home() {
                             transition={{ duration: 0.2 }}
                             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                         >
-                            <div className={`p-4 rounded-lg max-w-2xl text-white shadow-md ${msg.role === "user" ? "bg-[#5f17c5]" : "bg-[#5f17c5]/70 text-white"}`}>
+                            <div className={`p-3 md:p-4 rounded-lg max-w-xs md:max-w-2xl text-white shadow-md ${msg.role === "user" ? "bg-[#5f17c5]" : "bg-[#5f17c5]/70 text-white"}`}>
                                 <ReactMarkdown>{msg.text}</ReactMarkdown>
                                 <div className="text-xs flex justify-end items-center space-x-1 text-gray-300 mt-1">
                                     <span>{msg.time}</span>
@@ -95,22 +95,22 @@ export default function Home() {
                     ))}
                     {isTyping && (
                         <div className="flex justify-start">
-                            <div className="p-4 rounded-lg max-w-2xl bg-[#5f17c5] text-white shadow-md animate-pulse">
+                            <div className="p-3 md:p-4 rounded-lg max-w-xs md:max-w-2xl bg-[#5f17c5] text-white shadow-md animate-pulse">
                                 <ReactMarkdown>{displayedText}</ReactMarkdown>
                             </div>
                         </div>
                     )}
                 </div>
-                <div className="flex space-x-3 items-center">
+                <div className="flex space-x-2 md:space-x-3 items-center">
                     <input
-                        className="flex-1 p-3 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f17c5] text-black placeholder-gray-500"
+                        className="flex-1 p-3 md:p-4 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f17c5] text-black placeholder-gray-500 text-sm md:text-base"
                         placeholder="Ask something..."
                         value={question}
                         onChange={(e) => setQuestion(e.target.value)}
                         onKeyPress={(e) => e.key === "Enter" && askQuestion()}
                     />
                     <button
-                        className="bg-[#5f17c5] p-3 rounded-full hover:bg-[#4a1396] transition flex items-center justify-center shadow-md w-12 h-12"
+                        className="bg-[#5f17c5] p-3 md:p-4 rounded-full hover:bg-[#4a1396] transition flex items-center justify-center shadow-md w-10 h-10 md:w-12 md:h-12"
                         onClick={askQuestion}
                         disabled={isTyping}
                     >
