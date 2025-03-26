@@ -66,7 +66,6 @@ export default function Home() {
         }, 10);
     };
 
-    // @ts-ignore
     return (
         <div className="flex md:px-12 flex-col items-center justify-center h-screen w-screen bg-gradient-to-br from-[#f3edff] to-[#dad0ff] text-black px-6 py-2 font-sans">
             <motion.div
