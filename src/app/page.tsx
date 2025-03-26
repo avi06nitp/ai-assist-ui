@@ -1,103 +1,124 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { motion } from "framer-motion";
+import { Send, Loader2, Check, CheckCheck } from "lucide-react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    const [question, setQuestion] = useState("");
+    interface Message {
+        role: "user" | "bot";
+        text: string;
+        time: string;
+        delivered: boolean;
+        seen: boolean;
+    }
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [isTyping, setIsTyping] = useState(false);
+    const [displayedText, setDisplayedText] = useState("Thinking...");
+
+    const getCurrentTime = () => {
+        return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    };
+
+    const askQuestion = async () => {
+        if (!question.trim()) return;
+
+        const userMessage: Message = { role: "user", text: question, time: getCurrentTime(), delivered: true, seen: false };
+        setMessages((prev) => [...prev, userMessage]);
+        setQuestion("");
+        setIsTyping(true);
+        setDisplayedText("Thinking...");
+
+        try {
+            const response = await fetch("https://ai-agent-assist-bot.onrender.com/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question }),
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch response");
+
+            const data = await response.json();
+            simulateTyping(data.answer);
+        } catch (error) {
+            console.error("Error fetching response:", error);
+            setIsTyping(false);
+            setDisplayedText("");
+        }
+    };
+
+    const simulateTyping = (text) => {
+        let index = 0;
+        setDisplayedText("");
+        const interval = setInterval(() => {
+            if (index < text.length) {
+                setDisplayedText((prev) => prev + text[index]);
+                index++;
+            } else {
+                clearInterval(interval);
+                setMessages((prev) => [...prev, { role: "bot", text, time: getCurrentTime(), delivered: true, seen: true }]);
+                setIsTyping(false);
+                setDisplayedText("");
+            }
+        }, 10);
+    };
+
+    // @ts-ignore
+    return (
+        <div className="flex md:px-12 flex-col items-center justify-center h-screen w-screen bg-gradient-to-br from-[#f3edff] to-[#dad0ff] text-black px-6 py-2 font-sans">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-full  bg-white p-4 rounded-2xl shadow-2xl flex flex-col space-y-4 border border-gray-200 h-full"
+            >
+                <h1 className="text-4xl font-extrabold text-center text-[#5f17c5]">Chat with AI</h1>
+                <div className="flex-1 overflow-y-auto p-4 bg-[#f5f5ff] rounded-lg space-y-4">
+                    {messages.map((msg, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: msg.role === "user" ? 50 : -50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                        >
+                            <div className={`p-4 rounded-lg max-w-2xl text-white shadow-md ${msg.role === "user" ? "bg-[#5f17c5]" : "bg-[#5f17c5]/70 text-white"}`}>
+                                <ReactMarkdown>{msg.text}</ReactMarkdown>
+                                <div className="text-xs flex justify-end items-center space-x-1 text-gray-300 mt-1">
+                                    <span>{msg.time}</span>
+                                    {msg.role === "user" && (msg.seen ? <CheckCheck size={14} /> : <Check size={14} />)}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                    {isTyping && (
+                        <div className="flex justify-start">
+                            <div className="p-4 rounded-lg max-w-2xl bg-[#5f17c5] text-white shadow-md animate-pulse">
+                                <ReactMarkdown>{displayedText}</ReactMarkdown>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                <div className="flex space-x-3 items-center">
+                    <input
+                        className="flex-1 p-3 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f17c5] text-black placeholder-gray-500"
+                        placeholder="Ask something..."
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && askQuestion()}
+                    />
+                    <button
+                        className="bg-[#5f17c5] p-3 rounded-full hover:bg-[#4a1396] transition flex items-center justify-center shadow-md w-12 h-12"
+                        onClick={askQuestion}
+                        disabled={isTyping}
+                    >
+                        {isTyping ? <Loader2 className="animate-spin" color="white" /> : <Send color="white" />}
+                    </button>
+                </div>
+            </motion.div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }
